@@ -8,26 +8,39 @@ import TodoLists from './TodoLists'
 function App() {
 
   // get data from data.json in another file
-  const [todos, setTodos ] = useState([]);
+  const [todos, setTodos] = useState([]);
   const inputRef = useRef();
+
+  useEffect(()=>{
+    console.log(todos)
+  }, [todos])
 
   function addTodo() {
     const input = inputRef.current.value;
-    console.log(input)
     if(input === "") return 
     setTodos(prevTodo=> {
-      return [...prevTodo, { name:input, complete:false}]
+      if(prevTodo.length < 0){
+        return [{ id: 1, name:input, complete:false}]
+      }else {
+        return [...prevTodo, { id: prevTodo.length-1 + 1, name:input, complete:false}]
+      }
+      
     })
+    
     inputRef.current.value = null;
-    console.log(todos)
   }
 
   function clearAllTodo() {
-    setTodos([]);
+    const clearCompletedTodo = todos.filter(todo => !todo.complete)
+    setTodos(clearCompletedTodo);
   }
 
-
-  
+  function toggleTodo(id) {
+    const copyTodos = [...todos]
+    const todo = copyTodos.find(todo => todo.id === id)
+    todo.complete = !todo.complete
+    setTodos(copyTodos)
+  }
 
 
   return (
@@ -35,9 +48,9 @@ function App() {
       <label>What is your todo list?</label>
       <input ref={inputRef} type="text" placeholder="todo" ></input>
       <button onClick={addTodo}>Submit</button>
-      <button onClick={clearAllTodo}>Clear all</button>
-      {/* <span>{inputRef.current}</span> */}
-    <TodoLists todos={todos}></TodoLists>
+      <button onClick={clearAllTodo}>Clear Completed</button>
+      <TodoLists todos={todos} toggleTodo={toggleTodo}></TodoLists>
+      <p>{todos.filter(todo => !todo.complete).length} left to do </p>
     </>
   );
 }
